@@ -7,15 +7,15 @@ const scrapeBlinkit = async (productQuery = 'milk') => {
 
   try {
     console.log(`[Blinkit] Opening Blinkit site...`);
-    await page.goto('https://www.blinkit.com/', { waitUntil: 'networkidle2' });
+    await page.goto('https://www.blinkit.com/', { waitUntil: 'domcontentloaded', timeout: 60000 });
 
     console.log(`[Blinkit] Waiting for search box...`);
-    await page.waitForSelector('input[type="search"]');
+    await page.waitForSelector('input[type="search"]', { timeout: 60000 });
+
     await page.type('input[type="search"]', productQuery);
     await page.keyboard.press('Enter');
+    await page.waitForTimeout(7000);
 
-    console.log(`[Blinkit] Waiting for results to load...`);
-    await page.waitForTimeout(5000);
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(3000);
 
@@ -33,6 +33,8 @@ const scrapeBlinkit = async (productQuery = 'milk') => {
     return { query: productQuery, results };
   } catch (err) {
     console.error(`[Blinkit Error] ${err.message}`);
+    const html = await page.content();
+    console.log(`[Blinkit HTML Dump]:\n${html.substring(0, 1000)}...`);
     await browser.close();
     return { error: err.message };
   }
