@@ -1,20 +1,21 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
 
 const scrapeBlinkit = async (productQuery = 'milk') => {
-  console.log(`[Blinkit] Launching Puppeteer...`);
+  console.log(`[Blinkit] Launching Stealth Puppeteer...`);
   const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
   const page = await browser.newPage();
 
   try {
-    console.log(`[Blinkit] Opening Blinkit site...`);
-    await page.goto('https://www.blinkit.com/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/114 Safari/537.36');
+    console.log(`[Blinkit] Navigating to Blinkit...`);
+    await page.goto('https://www.blinkit.com/', { waitUntil: 'networkidle2', timeout: 60000 });
 
-    console.log(`[Blinkit] Waiting for search box...`);
     await page.waitForSelector('input[type="search"]', { timeout: 60000 });
-
     await page.type('input[type="search"]', productQuery);
     await page.keyboard.press('Enter');
-    await page.waitForTimeout(7000);
+    await page.waitForTimeout(8000);
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(3000);
@@ -28,7 +29,7 @@ const scrapeBlinkit = async (productQuery = 'milk') => {
       }));
     });
 
-    console.log(`[Blinkit] Found ${results.length} results`);
+    console.log(`[Blinkit] Scraped ${results.length} products.`);
     await browser.close();
     return { query: productQuery, results };
   } catch (err) {
