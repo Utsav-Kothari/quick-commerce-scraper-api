@@ -24,8 +24,11 @@ const scrapeBlinkit = async (productQuery = 'milk') => {
     console.log(`[URL Loaded] ${page.url()}`);
     console.log(`[Title] ${await page.title()}`);
 
-    await page.waitForSelector('input[type="search"]', { timeout: 60000 });
-    await page.type('input[type="search"]', productQuery);
+    const placeholders = await page.$$eval('input', els => els.map(e => e.placeholder));
+    console.log('[Blinkit] Input placeholders found:', placeholders);
+
+    await page.waitForSelector('input[placeholder*="Search"]', { timeout: 60000 });
+    await page.type('input[placeholder*="Search"]', productQuery);
     await page.keyboard.press('Enter');
     await page.waitForTimeout(8000);
 
