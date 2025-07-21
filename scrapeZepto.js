@@ -24,6 +24,9 @@ const scrapeZepto = async (productQuery = 'milk') => {
     console.log(`[URL Loaded] ${page.url()}`);
     console.log(`[Title] ${await page.title()}`);
 
+    const placeholders = await page.$$eval('input', els => els.map(e => e.placeholder));
+    console.log('[Zepto] Input placeholders found:', placeholders);
+
     try {
       await page.waitForSelector('[data-testid="location-popup"] button', { timeout: 5000 });
       console.log(`[Zepto] Location popup detected — closing`);
@@ -33,8 +36,8 @@ const scrapeZepto = async (productQuery = 'milk') => {
       console.log(`[Zepto] No location popup detected`);
     }
 
-    await page.waitForSelector('input[placeholder="Search for products"]', { timeout: 60000 });
-    await page.type('input[placeholder="Search for products"]', productQuery);
+    await page.waitForSelector('input[placeholder*="Search"]', { timeout: 60000 });
+    await page.type('input[placeholder*="Search"]', productQuery);
     await page.keyboard.press('Enter');
     await page.waitForTimeout(8000);
 
