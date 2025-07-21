@@ -8,8 +8,21 @@ const scrapeZepto = async (productQuery = 'milk') => {
   const page = await browser.newPage();
 
   try {
+    await page.setViewport({ width: 1280, height: 800 });
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/114 Safari/537.36');
+    await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-IN,en;q=0.9' });
+    await page.emulateTimezone('Asia/Kolkata');
+    await page.setGeolocation({ latitude: 28.6139, longitude: 77.2090 });
+    await page.evaluateOnNewDocument(() => {
+      navigator.geolocation.getCurrentPosition = function(success) {
+        success({ coords: { latitude: 28.6139, longitude: 77.2090 } });
+      };
+    });
+
+    console.log(`[Zepto] Navigating to Zepto...`);
     await page.goto('https://www.zeptonow.com/', { waitUntil: 'networkidle2', timeout: 60000 });
+    console.log(`[URL Loaded] ${page.url()}`);
+    console.log(`[Title] ${await page.title()}`);
 
     try {
       await page.waitForSelector('[data-testid="location-popup"] button', { timeout: 5000 });
